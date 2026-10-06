@@ -1,0 +1,305 @@
+College Event Scheduling Project – Full Explanation
+
+Project purpose:
+This project creates a timetable for college events. It takes a list of rooms, available equipment, and events, then tries to assign each event a suitable room and time slot without conflicts. The system checks room availability, equipment stock, organizer availability, and room fit (type and capacity).
+
+The project is built in 4 code files:
+1. index.html
+2. app.js
+3. scheduler.js
+4. event_scheduler.py
+
+----------------------------------------
+1) index.html
+----------------------------------------
+This file is the main page layout of the application.
+
+What it does:
+- Creates the user interface for the app.
+- Shows three input areas:
+  - Rooms
+  - Equipment
+  - Events
+- Provides buttons for:
+  - Solve (MRV)
+  - Plain backtracking
+  - Load demo
+- Displays the schedule visualization and results.
+- Adds styling so the page looks modern and clean.
+
+Important parts:
+- HTML structure: page sections, headers, panels, textareas, buttons.
+- CSS: styling for layout, colors, chips, board, timetable blocks, etc.
+- The page is connected to JavaScript logic through the DOM (document elements).
+
+Role in the project:
+This file is only the front-end interface. It does not do the actual scheduling logic itself. It receives input from the user and shows the result.
+
+----------------------------------------
+2) app.js
+----------------------------------------
+This file is the UI logic layer. It connects the form inputs to the scheduling algorithm.
+
+Main responsibilities:
+- Parse the rooms data entered by the user.
+- Parse equipment data.
+- Parse event data.
+- Validate inputs.
+- Run the solver.
+- Draw the schedule on the page.
+- Display error messages if the input is invalid.
+
+Important functions:
+
+1. lines(text)
+- Splits the input by lines.
+- Removes blanks and comment lines.
+- Helps parse each section cleanly.
+
+2. parseRooms(text)
+- Reads each room line in the format:
+  Name, type, capacity
+- Example:
+  CR-101, classroom, 60
+- Stores them into an object like:
+  { "CR-101": { type: "classroom", cap: 60 } }
+
+3. parseEquip(text)
+- Reads equipment lines in the format:
+  item, stock
+- Example:
+  projector, 3
+- Stores stock values.
+
+4. parseEvents(text)
+- Reads events in the format:
+  Name, duration, attendees, roomType, organiser, equipment requirements
+- Example:
+  Guest Lecture, 2, 150, seminar, Dept-DS, projector=1;mic=1
+- Stores each event with:
+  - duration
+  - attendance
+  - required room type
+  - organiser
+  - equipment requirements
+
+5. readInputs()
+- Reads all form values.
+- Converts them into the data format needed by Scheduler.
+- Verifies that rooms and events exist.
+
+6. runSolve(smart)
+- Calls the scheduling algorithm.
+- Uses the Scheduler from scheduler.js.
+- Then it renders the output to the page.
+
+7. renderStats(found, nodes, ms, smart)
+- Shows whether a schedule was found.
+- Displays solver mode (MRV vs plain backtracking).
+- Displays number of search nodes and time taken.
+
+8. renderBoard(rooms, sch, found)
+- Builds the timetable grid.
+- Draws room rows and event blocks.
+- Shows times such as 09:00, 10:00, etc.
+
+9. renderTable(sch, found)
+- Displays the final schedule as a table.
+- Lists event name, room, and time slot.
+
+10. Event handlers
+- Button click events call runSolve(true) or runSolve(false).
+- Load demo fills sample data and solves immediately.
+
+How the app works:
+- The page loads with demo values.
+- The user can either use demo data or paste custom data.
+- Clicking a solve button triggers the algorithm.
+- The algorithm tries to build a valid timetable.
+- The result is displayed visually in the board and table.
+
+----------------------------------------
+3) scheduler.js
+----------------------------------------
+This is the main algorithm file and the heart of the project.
+
+Important constants:
+- SLOTS = 8
+  This means the working day is 8 hours from 9:00 AM to 5:00 PM.
+- START_HOUR = 9
+  Used to format times like 09:00, 10:00, etc.
+
+Class: Scheduler
+This class stores all current state during the search.
+
+State variables:
+- this.rooms
+  Stores all rooms with their type and capacity.
+- this.equip
+  Stores equipment stock counts.
+- this.events
+  Stores all event details.
+- this.smart
+  Controls whether the solver uses MRV heuristic.
+- this.roomBusy
+  Tracks which rooms are occupied at each hour.
+- this.eqUsed
+  Tracks how much equipment is already used in each time slot.
+- this.orgBusy
+  Tracks whether a particular organiser is busy at each hour.
+- this.assign
+  Stores the final assignment: event -> [room, start]
+- this.nodes
+  Counts how many recursive search nodes were visited.
+
+Key methods:
+
+1. options(ev)
+- Generates all valid (room, start_time) options for one event.
+- For each room:
+  - Check room type matches required type
+  - Check capacity is enough
+  - Try each possible start hour
+  - Use ok() to check if the placement is valid
+
+2. ok(ev, r, s)
+This is the most important constraint function.
+It checks whether placing an event at room r starting at slot s is allowed.
+
+It verifies:
+- Room is free in all time slots covered by the event.
+- The organiser is free in all covered slots.
+- Equipment demand does not exceed stock in any covered slot.
+
+If any requirement fails, it returns false.
+
+3. place(ev, r, s, on)
+- Marks assignment onto the current schedule.
+- If on is true, it sets busy values and equipment usage.
+- If on is false, it undoes the assignment and removes the event from the schedule.
+
+4. solve(pending = null)
+This is the recursive backtracking engine.
+
+How it works:
+- If there are no pending events left, success is reached.
+- Otherwise, choose one event to schedule.
+- Generate all legal choices for that event.
+- Try each choice one by one.
+- Place the event.
+- Recurse on the remaining events.
+- If recursion fails, undo the assignment and try the next option.
+- If no option works, return false for that branch.
+
+This is classic backtracking:
+- try a valid choice
+- recurse deeper
+- if conflict occurs, undo and test another possibility
+
+MRV optimization:
+If smart = true, the algorithm uses the Minimum Remaining Values (MRV) heuristic.
+- It computes the number of legal placements for each unscheduled event.
+- It picks the event with the fewest options first.
+- This reduces the search tree and makes the solver faster.
+- This is useful when there are many events and fewer valid placements.
+
+Plain backtracking:
+If smart = false, the algorithm chooses the first event in order instead of the most constrained one.
+This is slower and less efficient, but it still works.
+
+----------------------------------------
+4) event_scheduler.py
+----------------------------------------
+This file is the Python version of the same scheduling logic.
+
+Why it exists:
+- It shows the original algorithm in Python.
+- It can be used as a reference implementation.
+- It can be run directly in the terminal to test the solver.
+
+Important data:
+- ROOMS contains six rooms with type and capacity.
+- EQUIPMENT contains stock counts for projector, mic, laptop, and camera.
+- EVENTS contains all events with duration, attendee count, room type, needed equipment, and organiser.
+
+Key methods in the Python Scheduler class:
+- options(ev)
+- ok(ev, r, s)
+- place(ev, r, s, on)
+- solve(pending=None)
+
+The logic is almost the same as the JavaScript version, just written in Python.
+
+The script prints:
+- whether the schedule is feasible
+- number of nodes explored
+- elapsed time
+- final event assignments if found
+
+This file is useful for:
+- debugging logic
+- testing with sample data
+- confirming that the algorithm works outside the browser
+
+----------------------------------------
+How the backtracking logic works in simple words
+----------------------------------------
+Backtracking means:
+Try one possibility, and if it leads to a dead end, undo it and try another.
+
+The scheduling problem is solved like this:
+1. Pick an unscheduled event.
+2. Find all room and time combinations that are legal.
+3. Try the first valid option.
+4. Move to the next event.
+5. Repeat until either:
+   - all events are scheduled, or
+   - a conflict appears.
+6. If a conflict appears, undo the last assignment.
+7. Try the next valid option.
+8. Continue until the whole schedule is built or no valid schedule exists.
+
+Each event must satisfy all constraints:
+- room type must match
+- room capacity must be enough
+- no room overlap
+- no organiser overlap
+- no equipment shortage
+
+If an event cannot be placed without breaking the rules, the algorithm backs out and tries another route.
+
+This is exactly how backtracking works in a constraint satisfaction problem.
+
+----------------------------------------
+Why MRV helps
+----------------------------------------
+MRV stands for Minimum Remaining Values.
+
+It chooses the event with the fewest legal placements first.
+This is effective because:
+- difficult events are scheduled early
+- difficult branches are checked before easy ones
+- the search tree is reduced
+- the solver reaches a valid answer faster
+
+Without MRV, the algorithm may still work, but it explores more unnecessary combinations.
+
+----------------------------------------
+Overall summary
+----------------------------------------
+This project is a constraint-based scheduling solver.
+It uses backtracking to assign events to rooms and time slots under strict rules.
+The JavaScript files create a working browser app, while the Python file shows the same algorithm in a script form.
+
+The program's core idea is simple:
+- keep track of what is occupied
+- generate valid placements
+- recursively assign events
+- undo when a branch fails
+- choose the most constrained event first when using MRV
+
+This makes the solution both logical and efficient for a small college scheduling problem.
+
+----------------------------------------
+End of explanation
+----------------------------------------

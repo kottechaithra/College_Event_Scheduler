@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>College Event Scheduling</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --paper: #e8f0ed;
+      --mist: #a8c0b6;
+      --teal: #0d6e63;
+      --teal-deep: #084840;
+      --amber: #f59e0b;
+      --glass: rgba(10, 28, 24, 0.78);
+      --line: rgba(232, 240, 237, 0.14);
+      --ok: #34d399;
+      --bad: #f87171;
+      --font-display: "Fraunces", Georgia, serif;
+      --font-body: "Manrope", system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-body);
+      color: var(--paper);
+      min-height: 100vh;
+      background:
+        radial-gradient(ellipse 70% 50% at 0% 0%, rgba(13, 110, 99, 0.4), transparent 55%),
+        radial-gradient(ellipse 50% 40% at 100% 0%, rgba(217, 119, 6, 0.18), transparent 50%),
+        linear-gradient(165deg, #061412, #0a2420 50%, #0f2a24);
+    }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1.5rem 1.2rem 3rem;
+    }
+
+    header {
+      margin-bottom: 1.5rem;
+      animation: rise 0.7s ease both;
+    }
+
+    header .badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--amber);
+    }
+
+    header h1 {
+      font-family: var(--font-display);
+      font-size: clamp(1.9rem, 4.5vw, 2.8rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin: 0.35rem 0 0.5rem;
+      background: linear-gradient(120deg, #f0faf6, var(--amber));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    header p {
+      color: var(--mist);
+      max-width: 34rem;
+      line-height: 1.5;
+      font-size: 0.98rem;
+    }
+
+    .panel {
+      background: var(--glass);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 1.15rem 1.2rem 1.3rem;
+      margin-bottom: 1.15rem;
+      animation: rise 0.85s ease both;
+    }
+
+    .panel h2 {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      margin-bottom: 0.9rem;
+    }
+
+    .inputs {
+      display: grid;
+      gap: 0.9rem;
+    }
+
+    @media (min-width: 800px) {
+      .inputs { grid-template-columns: 1fr 1fr 1.4fr; }
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--mist);
+      margin-bottom: 0.4rem;
+    }
+
+    .field .hint {
+      font-size: 0.75rem;
+      color: rgba(168, 192, 182, 0.75);
+      margin-bottom: 0.4rem;
+      line-height: 1.4;
+      text-transform: none;
+      letter-spacing: 0;
+      font-weight: 500;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 160px;
+      resize: vertical;
+      font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+      font-size: 0.8rem;
+      line-height: 1.45;
+      color: var(--paper);
+      background: rgba(0, 0, 0, 0.32);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 0.7rem 0.8rem;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: rgba(245, 158, 11, 0.5);
+      box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.15);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      margin-top: 1rem;
+    }
+
+    button {
+      font: inherit;
+      font-weight: 700;
+      font-size: 0.88rem;
+      border-radius: 11px;
+      padding: 0.7rem 1.1rem;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: transform 0.15s, box-shadow 0.2s, background 0.2s;
+    }
+
+    button:active { transform: scale(0.98); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--teal), var(--teal-deep));
+      color: #fff;
+      box-shadow: 0 8px 22px rgba(13, 110, 99, 0.35);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 26px rgba(13, 110, 99, 0.45);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border-color: var(--line);
+      color: var(--paper);
+    }
+
+    .btn-ghost:hover { border-color: rgba(245, 158, 11, 0.45); }
+
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      min-height: 2rem;
+    }
+
+    .chip {
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 0.4rem 0.75rem;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(0, 0, 0, 0.28);
+      color: var(--mist);
+      animation: pop 0.4s ease both;
+    }
+
+    .chip.ok { color: var(--ok); border-color: rgba(52, 211, 153, 0.4); }
+    .chip.bad { color: var(--bad); border-color: rgba(248, 113, 113, 0.4); }
+
+    /* Timetable visualization */
+    .board-wrap {
+      overflow-x: auto;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(0, 0, 0, 0.25);
+    }
+
+    .board {
+      min-width: 740px;
+      --label: 108px;
+      --cols: 8;
+    }
+
+    .hours {
+      display: grid;
+      grid-template-columns: var(--label) repeat(var(--cols), minmax(78px, 1fr));
+      border-bottom: 1px solid var(--line);
+      background: rgba(10, 31, 27, 0.95);
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    .hours .pad {
+      border-right: 1px solid var(--line);
+    }
+
+    .hour {
+      text-align: center;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: var(--mist);
+      padding: 0.65rem 0.25rem;
+      border-right: 1px solid var(--line);
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: var(--label) 1fr;
+      border-bottom: 1px solid var(--line);
+      min-height: 78px;
+      animation: rise 0.5s ease both;
+    }
+
+    .room-label {
+      position: sticky;
+      left: 0;
+      z-index: 1;
+      background: #0a1f1b;
+      padding: 0.7rem 0.65rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 0.15rem;
+      border-right: 1px solid var(--line);
+    }
+
+    .room-label small {
+      font-size: 0.68rem;
+      font-weight: 500;
+      color: var(--mist);
+    }
+
+    .track {
+      display: grid;
+      grid-template-columns: repeat(var(--cols), minmax(78px, 1fr));
+      position: relative;
+      background:
+        repeating-linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0.025) 0,
+          rgba(255, 255, 255, 0.025) calc(100% / var(--cols)),
+          rgba(255, 255, 255, 0.045) calc(100% / var(--cols)),
+          rgba(255, 255, 255, 0.045) calc(200% / var(--cols))
+        );
+    }
+
+    .block {
+      grid-row: 1;
+      margin: 10px 5px;
+      border-radius: 10px;
+      padding: 0.5rem 0.6rem;
+      overflow: hidden;
+      color: #fff;
+      font-size: 0.74rem;
+      font-weight: 700;
+      line-height: 1.25;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+      cursor: default;
+      position: relative;
+      align-self: stretch;
+      animation: slideIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+      transition: transform 0.2s, filter 0.2s, box-shadow 0.2s;
+    }
+
+    .block:hover {
+      transform: translateY(-2px) scale(1.015);
+      filter: brightness(1.08);
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.35);
+      z-index: 3;
+    }
+
+    .block .sub {
+      display: block;
+      font-weight: 500;
+      opacity: 0.88;
+      font-size: 0.66rem;
+      margin-top: 0.15rem;
+    }
+
+    .block::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.18) 50%, transparent 70%);
+      background-size: 200% 100%;
+      animation: shimmer 2.4s ease-in-out infinite;
+      pointer-events: none;
+      border-radius: inherit;
+    }
+
+    .empty-msg {
+      padding: 2rem 1rem;
+      text-align: center;
+      color: var(--mist);
+      font-size: 0.92rem;
+    }
+
+    .table-wrap {
+      margin-top: 1rem;
+      overflow: auto;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 0.55rem 0.75rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    th {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--mist);
+      background: rgba(0, 0, 0, 0.25);
+    }
+
+    tbody tr {
+      animation: rise 0.45s ease both;
+    }
+
+    tbody tr:hover td { background: rgba(255, 255, 255, 0.04); }
+
+    .err {
+      color: var(--bad);
+      font-size: 0.85rem;
+      margin-top: 0.6rem;
+      animation: shake 0.4s ease;
+    }
+
+    details.logic {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 0.85rem 1rem 1rem;
+      background: rgba(0, 0, 0, 0.22);
+      margin-bottom: 1.15rem;
+      animation: rise 0.75s ease both;
+    }
+
+    details.logic summary {
+      cursor: pointer;
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 600;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    details.logic summary::-webkit-details-marker { display: none; }
+
+    details.logic summary::after {
+      content: "+";
+      font-family: var(--font-body);
+      font-size: 1.2rem;
+      color: var(--amber);
+    }
+
+    details.logic[open] summary::after { content: "−"; }
+
+    .logic-body {
+      margin-top: 0.9rem;
+      color: var(--mist);
+      font-size: 0.92rem;
+      line-height: 1.55;
+      display: grid;
+      gap: 0.85rem;
+    }
+
+    .logic-body h3 {
+      font-family: var(--font-display);
+      font-size: 0.98rem;
+      color: #f0faf6;
+      margin-bottom: 0.25rem;
+    }
+
+    .logic-body ol, .logic-body ul {
+      padding-left: 1.2rem;
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    .logic-body code {
+      font-size: 0.82rem;
+      background: rgba(0, 0, 0, 0.35);
+      padding: 0.1rem 0.35rem;
+      border-radius: 5px;
+      color: var(--amber);
+    }
+
+    .logic-body .flow {
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 0.78rem;
+      line-height: 1.5;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 0.75rem 0.9rem;
+      color: #cfe8df;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    .files {
+      display: grid;
+      gap: 0.4rem;
+      font-size: 0.86rem;
+    }
+
+    .files strong { color: #fff; }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    @keyframes pop {
+      from { opacity: 0; transform: scale(0.85); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-18px) scale(0.92); }
+      to { opacity: 1; transform: none; }
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 120% 0; }
+      100% { background-position: -120% 0; }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: none; }
+      25% { transform: translateX(-4px); }
+      75% { transform: translateX(4px); }
+    }
+
+    ::-webkit-scrollbar { height: 8px; width: 8px; }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(168, 192, 182, 0.3);
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="badge">Project 19 · Backtracking</div>
+      <h1>College Event Scheduling</h1>
+      <p>Paste rooms, equipment, and events in the simple formats below, then solve and watch the timetable fill in.</p>
+    </header>
+
+    <details class="logic" open>
+      <summary>How the logic works &amp; where the code is</summary>
+      <div class="logic-body">
+        <div>
+          <h3>Problem</h3>
+          <p>Assign every event a <strong>room + start time</strong> so nothing clashes:</p>
+          <ul>
+            <li><strong>Room</strong> — two events cannot share a room in overlapping hours</li>
+            <li><strong>Equipment</strong> — total demand ≤ stock in every hour</li>
+            <li><strong>Organiser</strong> — one club/faculty cannot run two events at once</li>
+            <li><strong>Fit</strong> — room type must match, capacity ≥ attendees</li>
+          </ul>
+        </div>
+
+        <div>
+          <h3>Backtracking steps</h3>
+          <ol>
+            <li>Pick an unscheduled event (plain order, or <strong>MRV</strong> = fewest options first)</li>
+            <li>List legal (room, start) choices via <code>options()</code> + <code>ok()</code></li>
+            <li><code>place(..., true)</code> — try one choice and update busy state</li>
+            <li>Recurse on remaining events with <code>solve()</code></li>
+            <li>If stuck: <code>place(..., false)</code> — <strong>undo</strong> and try the next choice</li>
+            <li>If no events left → success; if no choices work → fail that branch</li>
+          </ol>
+        </div>
+
+        <div class="flow">solve(pending):
+  if pending empty → SUCCESS
+  pick event e
+  for each (room, start) in options(e):
+      place(e)          # TRY
+      if solve(rest): return SUCCESS
+      undo place(e)     # BACKTRACK
+  return FAIL</div>
+
+        <div>
+          <h3>File structure</h3>
+          <div class="files">
+            <div><strong>scheduler.js</strong> — your backtracking algorithm (<code>Scheduler</code>: <code>ok</code>, <code>options</code>, <code>place</code>, <code>solve</code>)</div>
+            <div><strong>event_scheduler.py</strong> — original Python version (same logic)</div>
+            <div><strong>app.js</strong> — input parsing, timetable UI, buttons only</div>
+            <div><strong>index.html</strong> — page layout &amp; styles</div>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <section class="panel">
+      <h2>Inputs</h2>
+      <div class="inputs">
+        <div class="field">
+          <label for="rooms-in">Rooms</label>
+          <div class="hint">One per line: <code>Name, type, capacity</code></div>
+          <textarea id="rooms-in" spellcheck="false" placeholder="CR-101, classroom, 60
+SH-1, seminar, 200
+LAB-A, lab, 40"></textarea>
+        </div>
+        <div class="field">
+          <label for="equip-in">Equipment</label>
+          <div class="hint">One per line: <code>item, stock</code></div>
+          <textarea id="equip-in" spellcheck="false" placeholder="projector, 3
+mic, 2
+laptop, 10"></textarea>
+        </div>
+        <div class="field">
+          <label for="events-in">Events</label>
+          <div class="hint">One per line:<br><code>Name, hours, attendees, type, organiser, equip=qty;equip=qty</code></div>
+          <textarea id="events-in" spellcheck="false" placeholder="Tech Quiz, 1, 50, classroom, QuizClub, projector=1
+AI Workshop, 2, 40, lab, Dept-DS, laptop=10;projector=1"></textarea>
+        </div>
+      </div>
+      <div id="parse-err" class="err" hidden></div>
+      <div class="actions">
+        <button class="btn-primary" type="button" id="solve-mrv">Solve (MRV)</button>
+        <button class="btn-ghost" type="button" id="solve-plain">Plain backtracking</button>
+        <button class="btn-ghost" type="button" id="load-demo">Load demo</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Schedule visualization</h2>
+      <div class="stats" id="stats">
+        <span class="chip">Load demo or paste inputs, then solve</span>
+      </div>
+      <div class="board-wrap" id="board-wrap">
+        <div class="empty-msg" id="empty">No schedule yet</div>
+      </div>
+      <div class="table-wrap" id="table-wrap" hidden>
+        <table>
+          <thead>
+            <tr><th>Event</th><th>Room</th><th>Time</th><th>Organiser</th></tr>
+          </thead>
+          <tbody id="result-body"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- Order matters: algorithm first, then UI -->
+  <script src="scheduler.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
